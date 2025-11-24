@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  landing-page:
+    build:
+      context: ./itire-landing-page
+      dockerfile: Dockerfile
+    container_name: itire-landing-page
+    ports:
+      - "25000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+  web-dashboard:
+    build:
+      context: ./itire-web-dashboard
+      dockerfile: Dockerfile
+    container_name: itire-web-dashboard
+    ports:
+      - "25002:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+  mobile-dashboard:
+    build:
+      context: ./itire-mobile-dashboard
+      dockerfile: Dockerfile
+    container_name: itire-mobile-dashboard
+    ports:
+      - "25001:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
