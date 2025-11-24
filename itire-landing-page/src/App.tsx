@@ -1,10 +1,10 @@
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
-import { 
-  Gauge, 
-  Thermometer, 
-  Activity, 
+import {
+  Gauge,
+  Thermometer,
+  Activity,
   ScanLine,
   Shield,
   Smartphone,
@@ -35,6 +35,7 @@ export default function App() {
               <img src={logoImage} alt="iTire" className="h-8" />
             </div>
             <div className="hidden md:flex items-center gap-8">
+              <a href="#dashboards" className="text-gray-600 hover:text-blue-600 transition-colors">Dashboards</a>
               <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
               <a href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors">How It Works</a>
               <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Pricing</a>
@@ -70,14 +71,97 @@ export default function App() {
             </div>
             <div className="relative">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" 
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
                   alt="iTire Dashboard"
                   className="w-full h-auto"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-transparent"></div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dashboard Access Section */}
+      <section id="dashboards" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge className="mb-4">Access Your Data</Badge>
+            <h2 className="text-4xl mb-4">Choose Your Dashboard</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Monitor your tire health in real-time with our intuitive dashboards designed for mobile and web
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-xl">
+              <CardHeader>
+                <div className="h-16 w-16 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
+                  <Smartphone className="h-8 w-8 text-blue-600" />
+                </div>
+                <CardTitle className="text-2xl">Mobile Dashboard</CardTitle>
+                <CardDescription className="text-base">
+                  Monitor on-the-go with our mobile-optimized interface
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Real-time tire metrics</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Instant push notifications</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Optimized for drivers</span>
+                  </li>
+                </ul>
+                <a href="https://mobile.itire.info" target="_blank" rel="noopener noreferrer" className="block">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    Open Mobile Dashboard
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-green-200 hover:border-green-400 transition-all hover:shadow-xl">
+              <CardHeader>
+                <div className="h-16 w-16 rounded-2xl bg-green-100 flex items-center justify-center mb-4">
+                  <Activity className="h-8 w-8 text-green-600" />
+                </div>
+                <CardTitle className="text-2xl">Web Dashboard</CardTitle>
+                <CardDescription className="text-base">
+                  Advanced analytics and fleet management tools
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Comprehensive analytics</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Multi-vehicle monitoring</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Perfect for fleet managers</span>
+                  </li>
+                </ul>
+                <a href="https://web.itire.info" target="_blank" rel="noopener noreferrer" className="block">
+                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                    Open Web Dashboard
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -91,7 +175,7 @@ export default function App() {
               Traditional TPMS only reacts when it's already too late. By then, you're already at risk.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <Card className="border-red-200 bg-red-50/50">
               <CardHeader>
@@ -102,7 +186,7 @@ export default function App() {
                 <CardDescription>Yearly tire-related accidents</CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="border-orange-200 bg-orange-50/50">
               <CardHeader>
                 <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center mb-4">
@@ -112,7 +196,7 @@ export default function App() {
                 <CardDescription>Of vehicle-defect crashes caused by tire/brake issues</CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="border-amber-200 bg-amber-50/50">
               <CardHeader>
                 <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center mb-4">
@@ -145,7 +229,7 @@ export default function App() {
               <h3 className="mb-2">Pressure</h3>
               <p className="text-gray-600">Continuous PSI monitoring with instant deviation alerts</p>
             </div>
-            
+
             <div className="text-center">
               <div className="h-16 w-16 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-4">
                 <Thermometer className="h-8 w-8 text-red-600" />
@@ -153,7 +237,7 @@ export default function App() {
               <h3 className="mb-2">Temperature</h3>
               <p className="text-gray-600">Heat detection prevents blowouts before they occur</p>
             </div>
-            
+
             <div className="text-center">
               <div className="h-16 w-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
                 <Activity className="h-8 w-8 text-purple-600" />
@@ -161,7 +245,7 @@ export default function App() {
               <h3 className="mb-2">Vibration</h3>
               <p className="text-gray-600">Detects imbalance and alignment issues early</p>
             </div>
-            
+
             <div className="text-center">
               <div className="h-16 w-16 rounded-2xl bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <ScanLine className="h-8 w-8 text-green-600" />
@@ -195,8 +279,8 @@ export default function App() {
                 </ul>
               </div>
               <div className="relative">
-                <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" 
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"
                   alt="Real-time monitoring dashboard"
                   className="rounded-xl shadow-lg w-full h-auto"
                 />
@@ -451,8 +535,8 @@ export default function App() {
           <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div>
-                <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80" 
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80"
                   alt="Mobile app dashboard"
                   className="rounded-xl shadow-lg w-full h-auto"
                 />
@@ -901,17 +985,19 @@ export default function App() {
                 Smart tire monitoring that prevents accidents before they happen.
               </p>
             </div>
-            
+
             <div>
               <h3 className="mb-4">Product</h3>
               <ul className="space-y-2 text-gray-400">
+                <li><a href="#dashboards" className="hover:text-white transition-colors">Dashboards</a></li>
+                <li><a href="http://mobile.itire.info" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Mobile Dashboard</a></li>
+                <li><a href="http://web.itire.info" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Web Dashboard</a></li>
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                 <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Tech Specs</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="mb-4">Company</h3>
               <ul className="space-y-2 text-gray-400">
@@ -921,7 +1007,7 @@ export default function App() {
                 <li><a href="#" className="hover:text-white transition-colors">Press Kit</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
@@ -932,7 +1018,7 @@ export default function App() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-gray-400">
