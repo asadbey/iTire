@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: ./itire-backend
+      dockerfile: Dockerfile
+    container_name: itire-backend
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+
   landing-page:
     build:
       context: ./itire-landing-page
