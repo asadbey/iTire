@@ -41,7 +41,7 @@ class TireSensor {
     // Keep values in realistic ranges
     this.pressure = Math.max(20, Math.min(40, this.pressure));
     this.temperature = Math.max(15, Math.min(45, this.temperature));
-    this.treadDepth = Math.max(1, Math.min(10, this.treadDepth));
+    this.treadDepth = Math.max(3, Math.min(10, this.treadDepth));
 
     // Determine status based on thresholds
     if (this.pressure < 28 || this.pressure > 38) {
