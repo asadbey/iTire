@@ -118,37 +118,110 @@ export function RealtimeDashboard() {
         </Alert>
       )}
 
-      {/* Sensor Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {sensors.map(sensor => (
-          <Card key={sensor.id} className="relative overflow-hidden">
-            <div className={`absolute top-0 left-0 w-full h-1 ${getStatusColor(sensor.status)}`} />
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center justify-between">
-                {sensor.position}
-                {getStatusBadge(sensor.status)}
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Last update: {new Date(sensor.lastUpdate).toLocaleTimeString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Pressure:</span>
-                <span className="font-mono font-semibold">{sensor.pressure} PSI</span>
+      {/* Vehicle Overview with Tire Positions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Vehicle Overview</CardTitle>
+          <CardDescription>Real-time tire sensor positions - Click to view details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="relative flex items-center justify-center py-8">
+            {/* Car silhouette with gradient */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative w-80 h-[480px]">
+                {/* Car body */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-200 to-slate-300 rounded-3xl opacity-20 border-4 border-slate-400"></div>
+                {/* Car windshield */}
+                <div className="absolute top-16 left-1/2 -translate-x-1/2 w-48 h-24 bg-slate-400 opacity-10 rounded-t-3xl"></div>
+                {/* Car label */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl font-bold text-slate-300 opacity-30">
+                  🚗
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Temperature:</span>
-                <span className="font-mono font-semibold">{sensor.temperature}°C</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Tread Depth:</span>
-                <span className="font-mono font-semibold">{sensor.treadDepth} mm</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+
+            {/* Position sensors around the car */}
+            <div className="relative w-full" style={{ height: '600px', maxWidth: '1200px' }}>
+              {sensors.map((sensor) => {
+                // Calculate position based on sensor name
+                const isFront = sensor.position.toLowerCase().includes('front');
+                const isRear = sensor.position.toLowerCase().includes('rear');
+                const isLeft = sensor.position.toLowerCase().includes('left');
+                const isRight = sensor.position.toLowerCase().includes('right');
+                const isMiddle = sensor.position.toLowerCase().includes('middle');
+                const isInner = sensor.position.toLowerCase().includes('inner');
+                const isOuter = sensor.position.toLowerCase().includes('outer');
+                
+                let positionStyle: React.CSSProperties = { position: 'absolute' };
+                
+                // Front tires
+                if (isFront && isLeft) {
+                  positionStyle = { ...positionStyle, top: '40px', left: '10%' };
+                } else if (isFront && isRight) {
+                  positionStyle = { ...positionStyle, top: '40px', right: '10%' };
+                }
+                // Rear tires
+                else if (isRear && isLeft) {
+                  positionStyle = { ...positionStyle, bottom: '40px', left: '10%' };
+                } else if (isRear && isRight) {
+                  positionStyle = { ...positionStyle, bottom: '40px', right: '10%' };
+                }
+                // Middle tires - Outer (further from center)
+                else if (isMiddle && isLeft && isOuter) {
+                  positionStyle = { ...positionStyle, top: '50%', transform: 'translateY(-50%)', left: '10%' };
+                } else if (isMiddle && isRight && isOuter) {
+                  positionStyle = { ...positionStyle, top: '50%', transform: 'translateY(-50%)', right: '10%' };
+                }
+                // Middle tires - Inner (closer to center)
+                else if (isMiddle && isLeft && isInner) {
+                  positionStyle = { ...positionStyle, top: '50%', transform: 'translateY(-50%)', left: '30%' };
+                } else if (isMiddle && isRight && isInner) {
+                  positionStyle = { ...positionStyle, top: '50%', transform: 'translateY(-50%)', right: '30%' };
+                }
+
+                return (
+                  <div
+                    key={sensor.id}
+                    style={positionStyle}
+                    className="transition-all duration-300 hover:scale-105 cursor-pointer"
+                  >
+                    <Card className={`w-40 border-3 shadow-xl hover:shadow-2xl transition-shadow ${
+                      sensor.status === 'critical' ? 'border-red-500 bg-red-50 hover:bg-red-100' :
+                      sensor.status === 'warning' ? 'border-yellow-500 bg-yellow-50 hover:bg-yellow-100' :
+                      'border-green-500 bg-green-50 hover:bg-green-100'
+                    }`}>
+                      <CardHeader className="pb-2 pt-2.5 px-2.5">
+                        <div className="flex flex-col gap-1">
+                          <CardTitle className="text-xs font-bold leading-tight">
+                            {sensor.position}
+                          </CardTitle>
+                          <div className="self-start">
+                            {getStatusBadge(sensor.status)}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="px-2.5 pb-2.5 space-y-1">
+                        <div className="text-xs flex justify-between items-center">
+                          <span className="text-muted-foreground font-medium">P:</span>
+                          <span className="font-mono font-bold">{sensor.pressure} PSI</span>
+                        </div>
+                        <div className="text-xs flex justify-between items-center">
+                          <span className="text-muted-foreground font-medium">T:</span>
+                          <span className="font-mono font-bold">{sensor.temperature}°C</span>
+                        </div>
+                        <div className="text-xs flex justify-between items-center">
+                          <span className="text-muted-foreground font-medium">D:</span>
+                          <span className="font-mono font-bold">{sensor.treadDepth} mm</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Real-time Charts */}
       {history.length > 0 && (

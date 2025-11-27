@@ -14,7 +14,7 @@ app.use(express.json());
 // Configuration
 const PORT = process.env.PORT || 3001;
 const UPDATE_INTERVAL = 2000; // 2 seconds
-const NUM_SENSORS = 8; // 8 tire sensors (4 wheels x 2 tires each for trucks, or 4 for cars)
+const NUM_SENSORS = 4; // 4 tire sensors for regular car
 
 // Sensor data structure
 class TireSensor {
@@ -86,16 +86,6 @@ const sensors = [
   new TireSensor(uuidv4(), 'Rear Left'),
   new TireSensor(uuidv4(), 'Rear Right'),
 ];
-
-// Add additional sensors for trucks (if NUM_SENSORS > 4)
-if (NUM_SENSORS > 4) {
-  sensors.push(
-    new TireSensor(uuidv4(), 'Middle Left Inner'),
-    new TireSensor(uuidv4(), 'Middle Left Outer'),
-    new TireSensor(uuidv4(), 'Middle Right Inner'),
-    new TireSensor(uuidv4(), 'Middle Right Outer')
-  );
-}
 
 // REST API Endpoints
 app.get('/api/health', (req, res) => {

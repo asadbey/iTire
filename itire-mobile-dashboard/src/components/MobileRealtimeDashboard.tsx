@@ -117,6 +117,63 @@ export function MobileRealtimeDashboard() {
         </Card>
       </div>
 
+      {/* Vehicle Overview with Tire Positions */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Vehicle Overview</CardTitle>
+          <CardDescription className="text-xs">Tap a tire for details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="relative flex items-center justify-center min-h-[320px]">
+            {/* Car silhouette placeholder */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-10">
+              <div className="w-32 h-48 border-4 border-slate-400 rounded-3xl"></div>
+            </div>
+
+            {/* Position sensors around the car */}
+            <div className="relative w-full max-w-xs h-80">
+              {sensors.map((sensor) => {
+                // Calculate position based on sensor name
+                const isFront = sensor.position.toLowerCase().includes('front');
+                const isRear = sensor.position.toLowerCase().includes('rear');
+                const isLeft = sensor.position.toLowerCase().includes('left');
+                const isMiddle = sensor.position.toLowerCase().includes('middle');
+                
+                let positionClass = '';
+                if (isFront && isLeft) positionClass = 'top-2 left-2';
+                else if (isFront && !isLeft && !isMiddle) positionClass = 'top-2 right-2';
+                else if (isRear && isLeft) positionClass = 'bottom-2 left-2';
+                else if (isRear && !isLeft && !isMiddle) positionClass = 'bottom-2 right-2';
+                else if (isMiddle && isLeft) positionClass = 'top-1/2 -translate-y-1/2 left-2';
+                else if (isMiddle && !isLeft) positionClass = 'top-1/2 -translate-y-1/2 right-2';
+
+                return (
+                  <div
+                    key={sensor.id}
+                    className={`absolute ${positionClass} transition-all duration-300`}
+                  >
+                    <Card className={`w-24 border-2 ${
+                      sensor.status === 'critical' ? 'border-red-500 bg-red-50' :
+                      sensor.status === 'warning' ? 'border-yellow-500 bg-yellow-50' :
+                      'border-green-500 bg-green-50'
+                    }`}>
+                      <CardContent className="p-2 text-center">
+                        <div className="text-xs font-semibold mb-1">{sensor.position}</div>
+                        {getStatusBadge(sensor.status)}
+                        <div className="text-xs mt-1 space-y-0.5">
+                          <div className="font-mono">{sensor.pressure}</div>
+                          <div className="text-xs text-muted-foreground">PSI</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Sensor List */}
       <div className="space-y-2">
         {sensors.map(sensor => (
