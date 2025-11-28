@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Gauge,
   Thermometer,
@@ -14,6 +14,8 @@ import {
   Calendar,
   Download,
   RefreshCw,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -31,6 +33,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { useSensors } from "../contexts/SensorContext";
 
 type TireStatus = "normal" | "warning" | "critical";
 
@@ -55,105 +58,134 @@ interface Notification {
 }
 
 export function WebDashboardView() {
-  const [selectedTire, setSelectedTire] = useState<string | null>("FL");
+  const { sensors, isConnected, reconnect } = useSensors();
+  const [selectedTire, setSelectedTire] = useState<string | null>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const MAX_HISTORY = 20;
 
-  // Mock tire data
-  const tires: TireData[] = [
-    {
-      id: "FL",
-      position: "FL",
-      positionFull: "Front Left",
-      temperature: 42,
-      pressure: 32.5,
-      treadDepth: 7.2,
-      vibration: 12,
-      wearLevel: 25,
-      status: "normal",
-    },
-    {
-      id: "FR",
-      position: "FR",
-      positionFull: "Front Right",
-      temperature: 68,
-      pressure: 28.1,
-      treadDepth: 3.1,
-      vibration: 45,
-      wearLevel: 78,
-      status: "critical",
-    },
-    {
-      id: "RL",
-      position: "RL",
-      positionFull: "Rear Left",
-      temperature: 48,
-      pressure: 30.2,
-      treadDepth: 5.5,
-      vibration: 18,
-      wearLevel: 42,
-      status: "warning",
-    },
-    {
-      id: "RR",
-      position: "RR",
-      positionFull: "Rear Right",
-      temperature: 45,
-      pressure: 31.8,
-      treadDepth: 6.8,
-      vibration: 15,
-      wearLevel: 30,
-      status: "normal",
-    },
-  ];
+  // Update history when sensors change
+  useEffect(() => {
+    if (sensors.length > 0) {
+      const newDataPoint: any = {
+        time: new Date().toLocaleTimeString(),
+      };
 
-  const notifications: Notification[] = [
-    {
-      id: "1",
-      type: "critical",
-      message: "Critical: Low tire pressure detected. Inflate immediately!",
-      tire: "FR",
-      time: "2 min ago",
-    },
-    {
-      id: "2",
-      type: "critical",
-      message: "Critical: Tread depth below safe level. Replace tire soon.",
-      tire: "FR",
-      time: "2 min ago",
-    },
-    {
-      id: "3",
-      type: "warning",
-      message: "Warning: Tire wear at 42%. Consider replacement in 18 days.",
-      tire: "RL",
-      time: "15 min ago",
-    },
-    {
-      id: "4",
-      type: "info",
-      message: "All tire sensors connected successfully via BLE 5.0",
-      tire: "All",
-      time: "1 hour ago",
-    },
-  ];
+      sensors.forEach(sensor => {
+        const shortPos = sensor.position.includes('Front Left') ? 'FL' :
+                        sensor.position.includes('Front Right') ? 'FR' :
+                        sensor.position.includes('Rear Left') ? 'RL' : 'RR';
+        newDataPoint[`${shortPos}-pressure`] = sensor.pressure;
+        newDataPoint[`${shortPos}-temp`] = sensor.temperature;
+      });
 
-  // Mock historical data for charts
-  const pressureHistory = [
-    { time: "00:00", FL: 32.8, FR: 30.2, RL: 31.5, RR: 32.0 },
-    { time: "04:00", FL: 32.6, FR: 29.8, RL: 31.2, RR: 31.9 },
-    { time: "08:00", FL: 32.5, FR: 29.0, RL: 30.8, RR: 31.8 },
-    { time: "12:00", FL: 32.4, FR: 28.5, RL: 30.5, RR: 31.7 },
-    { time: "16:00", FL: 32.5, FR: 28.2, RL: 30.3, RR: 31.8 },
-    { time: "20:00", FL: 32.5, FR: 28.1, RL: 30.2, RR: 31.8 },
-  ];
+      setHistory(prev => {
+        const updated = [...prev, newDataPoint];
+        return updated.slice(-MAX_HISTORY);
+      });
+    }
+  }, [sensors]);
 
-  const temperatureHistory = [
-    { time: "00:00", FL: 38, FR: 52, RL: 40, RR: 39 },
-    { time: "04:00", FL: 39, FR: 55, RL: 42, RR: 40 },
-    { time: "08:00", FL: 40, FR: 60, RL: 44, RR: 42 },
-    { time: "12:00", FL: 41, FR: 64, RL: 46, RR: 43 },
-    { time: "16:00", FL: 42, FR: 66, RL: 47, RR: 44 },
-    { time: "20:00", FL: 42, FR: 68, RL: 48, RR: 45 },
-  ];
+  // Select first sensor by default
+  useEffect(() => {
+    if (sensors.length > 0 && !selectedTire) {
+      const firstSensor = sensors[0];
+      const shortPos = firstSensor.position.includes('Front Left') ? 'FL' :
+                      firstSensor.position.includes('Front Right') ? 'FR' :
+                      firstSensor.position.includes('Rear Left') ? 'RL' : 'RR';
+      setSelectedTire(shortPos);
+    }
+  }, [sensors, selectedTire]);
+
+  // Show loading state if no sensors yet
+  if (sensors.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-50 mt-16 flex items-center justify-center">
+        <div className="text-center">
+          <Activity className="w-16 h-16 animate-spin text-blue-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold mb-2">Connecting to Sensors...</h2>
+          <p className="text-muted-foreground">Establishing WebSocket connection</p>
+          {!isConnected && (
+            <Button onClick={reconnect} className="mt-4">
+              Retry Connection
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Convert real-time sensor data to TireData format
+  const tires: TireData[] = sensors.map(sensor => {
+    const shortPos = sensor.position.includes('Front Left') ? 'FL' :
+                    sensor.position.includes('Front Right') ? 'FR' :
+                    sensor.position.includes('Rear Left') ? 'RL' : 'RR';
+    
+    // Calculate vibration and wear level from sensor data
+    const vibration = Math.round((sensor.temperature - 20) * 2);
+    const wearLevel = Math.round(((10 - sensor.treadDepth) / 10) * 100);
+
+    return {
+      id: shortPos,
+      position: shortPos,
+      positionFull: sensor.position,
+      temperature: sensor.temperature,
+      pressure: sensor.pressure,
+      treadDepth: sensor.treadDepth,
+      vibration: vibration,
+      wearLevel: wearLevel,
+      status: sensor.status,
+    };
+  });
+
+  // Calculate status counts from real-time sensor data
+  const statusCounts = {
+    normal: sensors.filter(s => s.status === 'normal').length,
+    warning: sensors.filter(s => s.status === 'warning').length,
+    critical: sensors.filter(s => s.status === 'critical').length,
+  };
+
+  // Generate notifications from sensor data
+  const notifications: Notification[] = [];
+  sensors.forEach(sensor => {
+    if (sensor.status === 'critical') {
+      if (sensor.pressure < 28) {
+        notifications.push({
+          id: `${sensor.id}-pressure`,
+          type: 'critical',
+          message: `Critical: Low tire pressure detected. Inflate immediately!`,
+          tire: sensor.position,
+          time: '2 min ago',
+        });
+      }
+      if (sensor.treadDepth < 3) {
+        notifications.push({
+          id: `${sensor.id}-tread`,
+          type: 'critical',
+          message: `Critical: Tread depth below safe level. Replace tire soon.`,
+          tire: sensor.position,
+          time: '2 min ago',
+        });
+      }
+    } else if (sensor.status === 'warning') {
+      notifications.push({
+        id: `${sensor.id}-warning`,
+        type: 'warning',
+        message: `Warning: Tire showing wear. Consider checking soon.`,
+        tire: sensor.position,
+        time: '15 min ago',
+      });
+    }
+  });
+
+  if (sensors.length > 0) {
+    notifications.push({
+      id: 'connected',
+      type: 'info',
+      message: `All ${sensors.length} tire sensors connected successfully via WebSocket`,
+      tire: 'All',
+      time: '1 hour ago',
+    });
+  }
 
   const getStatusColor = (status: TireStatus) => {
     switch (status) {
@@ -184,9 +216,9 @@ export function WebDashboardView() {
   const warningCount = notifications.filter((n) => n.type === "warning").length;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 mt-16">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-16 z-40">
         <div className="max-w-[1800px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -200,10 +232,21 @@ export function WebDashboardView() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm">4 Tires Connected</span>
-              </div>
+              {isConnected ? (
+                <div className="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg">
+                  <Wifi className="w-4 h-4" />
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm">{sensors.length} Tires Connected</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-red-50 text-red-700 px-3 py-2 rounded-lg">
+                  <WifiOff className="w-4 h-4" />
+                  <span className="text-sm">Disconnected</span>
+                  <Button size="sm" onClick={reconnect} variant="ghost" className="h-6 px-2">
+                    Reconnect
+                  </Button>
+                </div>
+              )}
 
               <Button variant="outline" size="sm">
                 <Download className="w-4 h-4 mr-2" />
@@ -385,17 +428,17 @@ export function WebDashboardView() {
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                     <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                    <div className="text-2xl text-green-900">2</div>
+                    <div className="text-2xl text-green-900">{statusCounts.normal}</div>
                     <div className="text-xs text-green-700">Normal</div>
                   </div>
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
                     <AlertTriangle className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                    <div className="text-2xl text-yellow-900">1</div>
+                    <div className="text-2xl text-yellow-900">{statusCounts.warning}</div>
                     <div className="text-xs text-yellow-700">Warning</div>
                   </div>
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                     <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
-                    <div className="text-2xl text-red-900">1</div>
+                    <div className="text-2xl text-red-900">{statusCounts.critical}</div>
                     <div className="text-xs text-red-700">Critical</div>
                   </div>
                 </div>
@@ -562,43 +605,47 @@ export function WebDashboardView() {
             <Card>
               <CardHeader>
                 <CardTitle>Tire Pressure History</CardTitle>
-                <CardDescription>Last 24 hours</CardDescription>
+                <CardDescription>Real-time pressure trends (Last {history.length} updates)</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={pressureHistory}>
+                  <LineChart data={history}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="time" />
-                    <YAxis domain={[25, 35]} />
+                    <YAxis domain={[20, 40]} />
                     <Tooltip />
                     <Legend />
                     <Line
                       type="monotone"
-                      dataKey="FL"
+                      dataKey="FL-pressure"
                       stroke="#22c55e"
                       strokeWidth={2}
                       name="Front Left"
+                      dot={false}
                     />
                     <Line
                       type="monotone"
-                      dataKey="FR"
+                      dataKey="FR-pressure"
                       stroke="#ef4444"
                       strokeWidth={2}
                       name="Front Right"
+                      dot={false}
                     />
                     <Line
                       type="monotone"
-                      dataKey="RL"
+                      dataKey="RL-pressure"
                       stroke="#eab308"
                       strokeWidth={2}
                       name="Rear Left"
+                      dot={false}
                     />
                     <Line
                       type="monotone"
-                      dataKey="RR"
+                      dataKey="RR-pressure"
                       stroke="#3b82f6"
                       strokeWidth={2}
                       name="Rear Right"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -609,19 +656,19 @@ export function WebDashboardView() {
             <Card>
               <CardHeader>
                 <CardTitle>Temperature Trends</CardTitle>
-                <CardDescription>Last 24 hours</CardDescription>
+                <CardDescription>Real-time temperature data (Last {history.length} updates)</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={temperatureHistory}>
+                  <AreaChart data={history}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="time" />
-                    <YAxis domain={[30, 75]} />
+                    <YAxis domain={[15, 45]} />
                     <Tooltip />
                     <Legend />
                     <Area
                       type="monotone"
-                      dataKey="FL"
+                      dataKey="FL-temp"
                       stackId="1"
                       stroke="#22c55e"
                       fill="#22c55e"
@@ -630,7 +677,7 @@ export function WebDashboardView() {
                     />
                     <Area
                       type="monotone"
-                      dataKey="FR"
+                      dataKey="FR-temp"
                       stackId="2"
                       stroke="#ef4444"
                       fill="#ef4444"
@@ -639,7 +686,7 @@ export function WebDashboardView() {
                     />
                     <Area
                       type="monotone"
-                      dataKey="RL"
+                      dataKey="RL-temp"
                       stackId="3"
                       stroke="#eab308"
                       fill="#eab308"
@@ -648,7 +695,7 @@ export function WebDashboardView() {
                     />
                     <Area
                       type="monotone"
-                      dataKey="RR"
+                      dataKey="RR-temp"
                       stackId="4"
                       stroke="#3b82f6"
                       fill="#3b82f6"
